@@ -83,6 +83,37 @@ import io.netty.util.concurrent.EventExecutor;
  * {@link ChannelPipeline} to find out more about inbound and outbound operations,
  * what fundamental differences they have, how they flow in a  pipeline,  and how to handle
  * the operation in your application.
+ *
+ * ChannelHandlerContext 的作用是就是存储ChannelHandler 为双向链表结构 (责任链模式)
+ * 同时负责ChannelPipeline 对ChannelHandler 的传播过程
+ *
+ * 在Netty 的设计中Handler 是无状态的，不能保存和Channel 有关的信息。Handler 的目标，是将自己的处理逻辑做得很通用，可以给不同的Channel 使用。
+ * 与Handler 不同的是，Pipeline 是有状态的，它保存了Channel 的关系。于是乎，Handler 和Pipeline 之间，需要有一个中间角色，把它们联系起来。
+ * 这就是——ChannelHandlerContext
+ *
+ * 不管我们定义的是哪种类型的Handler 业务处理器，最终它们都是以双向链表的方式保存在流水线中。这里流水线的节点类型，并不是前面的Handler 业务处理器基类，
+ * 而是其包装类型：ChannelHandlerContext 通道处理器上下文。当Handler 业务处理器被添加到流水线中时，会为其专门创建一个通道处理器上下文
+ * ChannelHandlerContext 实例，主要封装了ChannelHandler 通道处理器和ChannelPipeline 通道流水线之间的关联关系。
+ *
+ * 所以流水线ChannelPipeline 中的双向链表，实质是一个由ChannelHandlerContext 组成的双向链表。而无状态的Handler，作为Context 的成员，关联在
+ * ChannelHandlerContext 中。
+ *
+ * ChannelHandlerContext 中包含了有许多方法，主要可以分为两类：第一类是获取上下文所关联的Netty 组件实例，如所关联的通道、所关联的流水线、
+ * 上下文内部Handler 业务处理器实例等；第二类是入站和出站处理方法。
+ *
+ * 如果通道Channel 或ChannelPipeline 的实例来调用这些出站和入站处理方法，它们就会在整条流水线中传播。然而，如果是通过ChannelHandlerContext
+ * 上下文调用出站和入站处理方法，就只会从当前的节点开始，往同类型的下一站处理器传播，而不是在整条流水线从头至尾进行完整的传播。
+ *
+ * 总结一下Channel、Handler、ChannelHandlerContext 三者的关系：Channel 通道拥有一条ChannelPipeline 通道流水线，每一个流水线节点为一个
+ * ChannelHandlerContext 上下文对象，每一个上下文中包裹了一个ChannelHandler 通道处理器。在ChannelHandler 通道处理器的入站/出站处理方法中，
+ * Netty 都会传递一个Context 上下文实例作为实际参数。处理器中的回调代码，可以通过Context 实参，在业务处理过程中去获取ChannelPipeline 实例或者
+ * Channel 实例。
+ *
+ * 实际上，通道流水线在没有加入任何处理器之前，装配了两个默认的处理器山下文：一个头部上下文叫做HeadContext、一个尾部上下文叫做TailContext。
+ * pipeline 的创建、初始化除了保存一些必要的属性外，核心就在于创建了HeadContext 头节点和TailContext 尾节点。
+ *
+ * 每个pipeline 中双向链表结构，从一开始就存在HeadContext 和TailContext 两个节点，后面添加的处理器上下文节点，都添加在HeadContext 实例和
+ * TailContext 实例之间。
  */
 public interface ChannelHandlerContext extends AttributeMap, ChannelInboundInvoker, ChannelOutboundInvoker {
 
@@ -155,6 +186,8 @@ public interface ChannelHandlerContext extends AttributeMap, ChannelInboundInvok
 
     /**
      * Return the assigned {@link ByteBufAllocator} which will be used to allocate {@link ByteBuf}s.
+     *
+     * 获取通道缓冲区分配器
      */
     ByteBufAllocator alloc();
 

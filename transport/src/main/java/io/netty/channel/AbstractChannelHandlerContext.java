@@ -61,7 +61,9 @@ import static io.netty.channel.ChannelHandlerMask.mask;
 abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, ResourceLeakHint {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractChannelHandlerContext.class);
+    // 双向链表的指针：指向后继节点
     volatile AbstractChannelHandlerContext next;
+    // 双向链表的指针：指向前驱节点
     volatile AbstractChannelHandlerContext prev;
 
     private static final AtomicIntegerFieldUpdater<AbstractChannelHandlerContext> HANDLER_STATE_UPDATER =
@@ -85,13 +87,16 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
      */
     private static final int INIT = 0;
 
+    // 所属流水线
     private final DefaultChannelPipeline pipeline;
+    // 上下文节点名称，在加入流水线时可以指定
     private final String name;
     private final boolean ordered;
     private final int executionMask;
 
     // Will be set to null if no child executor should be used, otherwise it will be set to the
     // child executor.
+    // 节点的执行线程，如果没有特别设置，则为通道的I/O 线程
     final EventExecutor executor;
     private ChannelFuture succeededFuture;
 
@@ -234,6 +239,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     static void invokeChannelActive(final AbstractChannelHandlerContext next) {
         EventExecutor executor = next.executor();
+        // 是否所属同一个线程，如果是则按当前线程执行，否则将丢入队列中等待执行
         if (executor.inEventLoop()) {
             next.invokeChannelActive();
         } else {
@@ -414,14 +420,21 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     static void invokeChannelRead(final AbstractChannelHandlerContext next, Object msg) {
+        // 池化缓冲区：引用计数算法
         final Object m = next.pipeline.touch(ObjectUtil.checkNotNull(msg, "msg"), next);
+        // 获取后继节点处理线程
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
+            // 如果当前线程为后继的处理线程
+            // 执行后继上下文所包装的处理器
             next.invokeChannelRead(m);
         } else {
+            // 如果当前处理线程不是后继线程的处理线程，则提交到后继处理队列去排队
+            // 保障该节点的处理器被设置的线程调用，避免发生线程安全问题
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
+                    // 提交到后继处理线程
                     next.invokeChannelRead(m);
                 }
             });
@@ -429,6 +442,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     private void invokeChannelRead(Object msg) {
+        // 执行Handler 回调方法
         if (invokeHandler()) {
             try {
                 // DON'T CHANGE
@@ -1049,6 +1063,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return false;
     }
 
+    // 查找下一个InboundHandler
     private AbstractChannelHandlerContext findContextInbound(int mask) {
         AbstractChannelHandlerContext ctx = this;
         EventExecutor currentExecutor = executor();
@@ -1058,6 +1073,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return ctx;
     }
 
+    // 查找下一个OutboundHandler
     private AbstractChannelHandlerContext findContextOutbound(int mask) {
         AbstractChannelHandlerContext ctx = this;
         EventExecutor currentExecutor = executor();

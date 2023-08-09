@@ -48,6 +48,11 @@ import java.util.List;
  * are of type {@link ReferenceCounted}. This is needed as the {@link MessageToMessageDecoder} will call
  * {@link ReferenceCounted#release()} on decoded messages.
  *
+ *
+ * 将一种POJO 对象解码为另一种POJO 对象，Netty 提供了MessageToMessageDecoder 解码器。在继承它的时候，需要明确的泛型参数<I>，其作用就是指定
+ * 入站消息的Java POJO 类型。
+ *
+ * MessageToMessageDecoder 同样也使用了模板模式，也有一个decode 抽象方法，其具体解码的逻辑需要子类去实现。
  */
 public abstract class MessageToMessageDecoder<I> extends ChannelInboundHandlerAdapter {
 

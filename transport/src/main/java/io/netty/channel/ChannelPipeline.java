@@ -218,6 +218,15 @@ import java.util.NoSuchElementException;
  * A {@link ChannelHandler} can be added or removed at any time because a {@link ChannelPipeline} is thread safe.
  * For example, you can insert an encryption handler when sensitive information is about to be exchanged, and remove it
  * after the exchange.
+ *
+ * ChannelInboundInvoker 和ChannelOutboundHandler 的组合实现
+ * 其内部实现了大量的针对ChannelHandler 的setter、getter 方法
+ *
+ * ChannelPipeline 可以看做是存储ChannelHandler 的容器，同时它还拥有ChannelInboundHandler 和ChannelOutboundHandler
+ * 对ChannelHandle 的调用方法。
+ *
+ * 一条Netty 通道需要很多的Handler 业务处理器来处理业务。每条通道内部都有一条流水线（Pipeline）将Handler 装配起来。
+ * Netty 的业务处理器流水线ChannelPipeline 是基于责任链设计模式来设计的，内部是一个双向链表结构，能够支持动态地添加和删除Handler 业务处理器。
  */
 public interface ChannelPipeline
         extends ChannelInboundInvoker, ChannelOutboundInvoker, Iterable<Entry<String, ChannelHandler>> {

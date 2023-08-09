@@ -183,15 +183,26 @@ import io.netty.channel.ChannelHandlerContext;
  * +------+--------+------+----------------+      +------+----------------+
  * </pre>
  * @see LengthFieldPrepender
+ *
+ * 在Netty 的开箱即用解码器中，最为复杂的解码器是LengthFieldBasedFrameDecoder 自定义长度数据包。它的难点在于参数比较多，也比较难以理解，同时它又比较常用。
+ *
+ * LengthFieldBasedFrameDecoder 可以翻译为“长度域数据包解码器” 或者“长度字段数据包解码器”。传输内容中的Length Field 长度字段的值，是指存放
+ * 在数据包中要传输内容的字节数。
+ *
  */
 public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
 
     private final ByteOrder byteOrder;
+    // 发送的数据包最大长度
     private final int maxFrameLength;
+    // 长度字段偏移量
     private final int lengthFieldOffset;
+    // 长度字段自己占用的字节数
     private final int lengthFieldLength;
     private final int lengthFieldEndOffset;
+    // 长度字段的偏移量矫正
     private final int lengthAdjustment;
+    // 丢弃的起始字节数
     private final int initialBytesToStrip;
     private final boolean failFast;
     private boolean discardingTooLongFrame;

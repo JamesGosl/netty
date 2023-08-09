@@ -375,8 +375,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     @Override
     protected void doRegister() throws Exception {
         boolean selected = false;
+
+        // 失败尝试另一种策略
         for (;;) {
             try {
+                // selectionKey 作为后续的重中之重
                 selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);
                 return;
             } catch (CancelledKeyException e) {

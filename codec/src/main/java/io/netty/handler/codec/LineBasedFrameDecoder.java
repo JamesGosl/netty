@@ -32,6 +32,12 @@ import java.util.List;
  * byte values for multibyte codepoint representations therefore fully supported by this implementation.
  * <p>
  * For a more general delimiter-based decoder, see {@link DelimiterBasedFrameDecoder}.
+ *
+ * 在Netty 中，提供了一个开箱即用的、使用换行符分隔字符串的解码器，它的名字LineBasedFrameDecoder。这个解码器的工作原理很简单，它一次遍历ByteBuf
+ * 数据报中的可读字节，判断在二进制字节流中，是否存在换行符“\n” 或者“\r\n” 的字符码。如果有，就以此位置为结束位置，把从可读索引到结束位置之间的字节作为
+ * 解码成功后的ByteBuf 数据报。
+ *
+ * LineBasedFrameDecoder 支持配置一个最大长度值，表示解码出来的ByteBuf 最大能包含的字节数。如果连续读取到最大长度后，仍然没有发现换行符，就会抛出异常。
  */
 public class LineBasedFrameDecoder extends ByteToMessageDecoder {
 

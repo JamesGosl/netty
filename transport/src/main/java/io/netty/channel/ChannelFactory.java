@@ -17,6 +17,10 @@ package io.netty.channel;
 
 /**
  * Creates a new {@link Channel}.
+ *
+ * ChannelFactory
+ *
+ * 在BootStrap 中因为需要将AbstractChannel 的Class 文件构建出来，所以这个工厂方法就是做这个实情的
  */
 @SuppressWarnings({ "ClassNameSameAsAncestorName", "deprecation" })
 public interface ChannelFactory<T extends Channel> extends io.netty.bootstrap.ChannelFactory<T> {

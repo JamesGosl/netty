@@ -25,6 +25,11 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
 /**
  * Allocates a new receive buffer whose capacity is probably large enough to read all inbound data and small enough
  * not to waste its space.
+ *
+ * 从通道里读取时，是不知道具体的接收数据大小的，那么申请的缓冲区具体要多大呢？首先不能太大，太大了浪费，其次也不能太小，太小了又不够，可能要涉及扩容，
+ * 性能不好，所以申请的缓冲区大小需要推测，Netty 设计了一个RecvByteBufAllocator 大小推测接口和一系列的大小推测实现类，帮助进行缓冲区大小的计算
+ * 和推测。默认的缓冲区大小推测实现类为AdaptiveRecvByteBufAllocator，其特点是能够根据上一次接收数据的大小，来自动调整下一次缓冲区建立时分配的
+ * 空间大小，从而帮助避免内存的浪费。
  */
 public interface RecvByteBufAllocator {
     /**

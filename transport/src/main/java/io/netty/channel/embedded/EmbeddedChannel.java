@@ -47,6 +47,10 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 
 /**
  * Base class for {@link Channel} implementations that are used in an embedded fashion.
+ *
+ * Embedded Channel 仅仅是模拟入站与出站的操作，底层不进行实际的传输，不需要启动Netty 服务器和客户端。除了不进行传输之外，EmbeddedChannel 的
+ * 其他的事件机制和处理流程和真正的传输通道是一模一样的。因此，使用EmbeddedChannel，开发人员可以在单元测试用例中方便、快速地进行ChannelHandler
+ * 业务处理器的单元测试。
  */
 public class EmbeddedChannel extends AbstractChannel {
 
@@ -304,6 +308,8 @@ public class EmbeddedChannel extends AbstractChannel {
 
     /**
      * Return received data from this {@link Channel}
+     *
+     * 从EmbeddedChannel 中读取入站数据，返回经过流水线最后一个入站处理器处理完成之后的入站数据。如果没有数据，则返回null。
      */
     @SuppressWarnings("unchecked")
     public <T> T readInbound() {
@@ -316,6 +322,8 @@ public class EmbeddedChannel extends AbstractChannel {
 
     /**
      * Read data from the outbound. This may return {@code null} if nothing is readable.
+     *
+     * 从EmbeddedChannel 中读取出站数据，返回经过流水线最后一个出站处理器处理之后的出站数据。如果乜有数据，则返回null。
      */
     @SuppressWarnings("unchecked")
     public <T> T readOutbound() {
@@ -332,6 +340,11 @@ public class EmbeddedChannel extends AbstractChannel {
      * @param msgs the messages to be written
      *
      * @return {@code true} if the write operation did add something to the inbound buffer
+     *
+     * 向通道写入 入站数据，模拟真实通道收到数据的场景。也就是说，这些写入的数据会被流水线上的入站处理器所处理到。
+     *
+     * 它的使用场景是：用于测试入站处理器。在测试入站处理器时（例如测试一个解码器），需要读取入站（Inbound）数据。可以调用writeInbound 方法，向
+     * EmbeddedChannel 写入一个入站数据（如二进制ByteBuf 数据包），模拟底层的入站包，从而被入站处理器处理到，达到测试的目的。
      */
     public boolean writeInbound(Object... msgs) {
         ensureOpen();
@@ -395,6 +408,11 @@ public class EmbeddedChannel extends AbstractChannel {
      *
      * @param msgs              the messages to be written
      * @return bufferReadable   returns {@code true} if the write operation did add something to the outbound buffer
+     *
+     * 向通道写入出站数据，模拟真实通道发送数据。也就是说，这些写入的数据会被流水线上的出站处理器处理。
+     *
+     * 它的使用场景是：用于测试出站处理器。在测试出站处理器时（例如测试一个编码器），需要有出站的（Outbound）数据进入到流水线。可以调用writeOutbound
+     * 方法，向通道模拟写入一个出站数据（如二进制ByteBuf 数据包），该包将进入处理器流水线，被待测试的出站处理器所处理。
      */
     public boolean writeOutbound(Object... msgs) {
         ensureOpen();
@@ -479,6 +497,8 @@ public class EmbeddedChannel extends AbstractChannel {
      * Mark this {@link Channel} as finished. Any further try to write data to it will fail.
      *
      * @return bufferReadable returns {@code true} if any of the used buffers has something left to read
+     *
+     * 结束EmbeddedChannel，它会调用通道的close 方法。
      */
     public boolean finish() {
         return finish(false);

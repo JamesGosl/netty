@@ -54,6 +54,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * {@link SingleThreadEventLoop} implementation which register the {@link Channel}'s to a
  * {@link Selector} and so does the multi-plexing of these in the event loop.
  *
+ *
+ * Reactor 反应器
+ *
+ * Dispatch 分发器
  */
 public final class NioEventLoop extends SingleThreadEventLoop {
 
@@ -502,6 +506,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     @Override
     protected void run() {
+        // Netty 核心逻辑
         int selectCnt = 0;
         for (;;) {
             try {

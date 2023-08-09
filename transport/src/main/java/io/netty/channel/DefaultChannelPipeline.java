@@ -42,6 +42,22 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 /**
  * The default {@link ChannelPipeline} implementation.  It is usually created
  * by a {@link Channel} implementation when the {@link Channel} is created.
+ *
+ * 默认的ChannelPipeline 实现
+ *
+ * 负责维护ChannelHandlerContext 的双向链表结构
+ * 负责调度ChannelHandlerContext 的责任链来完成事件传递
+ *
+ * ------------------------------------------------------------------------------
+ * | ChannelPipeline                                                            |
+ * |                                                                            |
+ * | ChannelHandlerContext -> ChannelHandlerContext -> ChannelHandlerContext    |
+ * |        |                           |                       |               |
+ * |        V                           V                       V               |
+ * | ChannelHandler             ChannelHandler              ChannelHandler      |
+ * |                                                                            |
+ * ------------------------------------------------------------------------------
+ *
  */
 public class DefaultChannelPipeline implements ChannelPipeline {
 
@@ -999,14 +1015,18 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return tail.deregister(promise);
     }
 
+    // 入站：启动流水线的入站读
     @Override
     public final ChannelPipeline read() {
+        // 从头往后传递
         tail.read();
         return this;
     }
 
+    // 出站：启动流水线的出站写
     @Override
     public final ChannelFuture write(Object msg) {
+        // 从后向前传递
         return tail.write(msg);
     }
 
@@ -1242,6 +1262,11 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     // A special catch-all handler that handles both bytes and messages.
+
+    /**
+     * 流水线尾部的TailContext 不仅仅是一个上下文类，而是一个入站处理器类，实现了所有入站处理回调方法，这些回调实现的主要工作，基本上都是收尾处理，
+     * 如释放缓冲区对象、完成异常处理等。
+     */
     final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
 
         TailContext(DefaultChannelPipeline pipeline) {
@@ -1293,6 +1318,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            // 释放缓冲区
             onUnhandledInboundMessage(ctx, msg);
         }
 
@@ -1302,6 +1328,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     * 流水线头部的HeadContext 则比TailContext 复杂得多，既是一个出站处理器、也是一个入站处理器，还保存了一个unsafe(完成实际通道传输的类)实例，
+     * 也是HeadContext 还需要负责最终的通道传输工作。
+     */
     final class HeadContext extends AbstractChannelHandlerContext
             implements ChannelOutboundHandler, ChannelInboundHandler {
 

@@ -30,6 +30,9 @@ import java.util.List;
  *
  * Be aware that sub-classes of {@link ByteToMessageCodec} <strong>MUST NOT</strong>
  * annotated with {@link @Sharable}.
+ *
+ * 完成POJO 到ByteBuf 数据报的编解码器基类，叫做ByteToMessageCodec<I>，它是一个抽象类。从功能上说，继承它就等同于继承了ByteToMessageDecoder 解码器
+ * 和MessageToByteEncoder 编码器这两个基类。包含了编码encode 和解码decode 两个抽象方法，需要自己实现。
  */
 public abstract class ByteToMessageCodec<I> extends ChannelDuplexHandler {
 

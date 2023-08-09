@@ -35,6 +35,9 @@ import io.netty.util.internal.StringUtil;
 
 /**
  * Special {@link ByteBuf} implementation which is used by the {@link ReplayingDecoder}
+ *
+ * ReplayingDecoderByteBuf 类型，它继承了ByteBuf 类型，包装了ByteBuf 类型的大部分读取方法。ReplayingDecoderByteBuf 对ByteBuf 类型的
+ * 读取方法做了什样的功能增强呢？主要是进行二进制数据长度的判断，如果长度不足，则抛出异常。这个异常会反过来被ReplayingDecoder 基类所捕获，将解码工作停掉。
  */
 final class ReplayingDecoderByteBuf extends ByteBuf {
 

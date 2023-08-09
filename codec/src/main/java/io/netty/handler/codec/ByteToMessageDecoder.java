@@ -72,6 +72,23 @@ import static java.lang.Integer.MAX_VALUE;
  * Some methods such as {@link ByteBuf#readBytes(int)} will cause a memory leak if the returned buffer
  * is not released or added to the <tt>out</tt> {@link List}. Use derived buffers like {@link ByteBuf#readSlice(int)}
  * to avoid leaking memory.
+ *
+ * 一个标准的解码器职责为：将输入类型作为ByteBuf 缓冲区的数据进行解码，输出一个一个的Java POJO 对象。Netty 内置了这个解码器，叫做ByteToMessageDecoder。
+ * Netty 中的解码器，都是Inbound 入站处理器类型，几乎都直接或者间接地实现了入站处理器的超级接口ChannelInboundHandler
+ *
+ * ByteToMessageDecoder 是一个非常重要的解码器基类，它是一个抽象类，实现了解码处理的基础逻辑和流程。ByteToMessageDecoder 继承自ChannelInboundHandlerAdapter
+ * 适配器，是一个入站处理器，用于完成从ByteBuf 到Java POJO 对象的解码功能。
+ *
+ * ByteToMessageDecoder 解码的流程，具体可以描述为：首先，它将上一站传过来的输入到ByteBuf 中的数据进行编码，解码出一个List<Object> 对象列表；
+ * 然后，迭代List<Object> 列表，逐个将Java POJO 对象传入下一站Inbound 入站处理器。
+ *
+ * ByteToMessageDecoder 是个抽象类，不能以实例化方式创建对象。也就是说，直接通过ByteToMessageDecoder 类，并不能完成ByteBuf 字节码到具体Java
+ * 类型的解码，还得依赖于它的具体实现。
+ *
+ * ByteToMessageDecoder 的解码方法名为decode，这是一个抽象方法，也就是说，decode 方法中的具体解码过程，ByteToMessageDecoder 没有具体的实现。
+ * 所以说作为解码器的父类，ByteToMessageDecoder 仅仅提供了一个整体框架：它会调用子类的decode 方法，完成具体的二进制解码，然后会获取子类解码之后的
+ * Object 结果，放入自己内部的结果列表List<Object> 中，最终，父类会负责将List<Object> 中的元素，一个一个地传递给下一个站。从这个角度来说，
+ * ByteToMessageDecoder 在设计上使用了模板模式。
  */
 public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter {
 

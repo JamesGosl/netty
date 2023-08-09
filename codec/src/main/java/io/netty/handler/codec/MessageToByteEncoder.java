@@ -42,6 +42,9 @@ import io.netty.util.internal.TypeParameterMatcher;
  *         }
  *     }
  * </pre>
+ *
+ * MessageToByteEncoder 是一个非常重要的编码器基类，它的功能是将一个Java POJO 对象编码成一个ByteBuf 数据包。它是一个抽象类，仅仅实现了编码的
+ * 基础流程，在编码过程中，通过调用encode 抽象方法来完成。但是它的encode 编码方法是一个抽象方法，没有具体的encode 编码实现，需要子类去完成。
  */
 public abstract class MessageToByteEncoder<I> extends ChannelOutboundHandlerAdapter {
 

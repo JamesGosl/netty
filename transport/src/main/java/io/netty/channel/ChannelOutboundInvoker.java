@@ -21,6 +21,9 @@ import io.netty.util.concurrent.FutureListener;
 import java.net.ConnectException;
 import java.net.SocketAddress;
 
+/**
+ * Channel Outbound 调用者
+ */
 public interface ChannelOutboundInvoker {
 
     /**
@@ -31,6 +34,9 @@ public interface ChannelOutboundInvoker {
      * {@link ChannelOutboundHandler#bind(ChannelHandlerContext, SocketAddress, ChannelPromise)} method
      * called of the next {@link ChannelOutboundHandler} contained in the {@link ChannelPipeline} of the
      * {@link Channel}.
+     *
+     * 此方法的作为用：绑定监听地址，开始监听新的客户端连接。
+     * 此方法在服务器的新连接监听和接收通道使用。
      */
     ChannelFuture bind(SocketAddress localAddress);
 
@@ -46,6 +52,9 @@ public interface ChannelOutboundInvoker {
      * {@link ChannelOutboundHandler#connect(ChannelHandlerContext, SocketAddress, SocketAddress, ChannelPromise)}
      * method called of the next {@link ChannelOutboundHandler} contained in the {@link ChannelPipeline} of the
      * {@link Channel}.
+     *
+     * 此方法的作用为：连接远程服务器。方法的参数为远程服务器的地址，调用后会立即返回，其返回值为执行连接的异步任务ChannelFuture。
+     * 此方法在客户端的传输通道使用
      */
     ChannelFuture connect(SocketAddress remoteAddress);
 
@@ -83,6 +92,9 @@ public interface ChannelOutboundInvoker {
      * {@link ChannelOutboundHandler#close(ChannelHandlerContext, ChannelPromise)}
      * method called of the next {@link ChannelOutboundHandler} contained in the {@link ChannelPipeline} of the
      * {@link Channel}.
+     *
+     * 此方法的作用为：关闭通道连接，返回连接关闭的ChannelFuture 异步任务。如果需要在连接正式关闭后执行其他操作，则需要为异步任务设置回调方法；
+     * 或者调用ChannelFuture 异步任务的sync 方法来阻塞当前线程，一直等待到通道关闭的异步任务执行完毕。
      */
     ChannelFuture close();
 
@@ -197,6 +209,10 @@ public interface ChannelOutboundInvoker {
      * {@link ChannelOutboundHandler#read(ChannelHandlerContext)}
      * method called of the next {@link ChannelOutboundHandler} contained in the {@link ChannelPipeline} of the
      * {@link Channel}.
+     *
+     * 此方法的作用为：读取通道数据，并且启动入站处理。具体来说，从内部的Java NIO Channel 通道读取数据，然后启动内部的Pipeline 流水线，开始数据
+     * 读取的入站处理。
+     * 此方法的返回通道自身用于链式调用。
      */
     ChannelOutboundInvoker read();
 
@@ -204,6 +220,9 @@ public interface ChannelOutboundInvoker {
      * Request to write a message via this {@link ChannelHandlerContext} through the {@link ChannelPipeline}.
      * This method will not request to actual flush, so be sure to call {@link #flush()}
      * once you want to request to flush all pending data to the actual transport.
+     *
+     * 此方法的作用为：启动出站流水处理，把处理后的最终数据写入底层通道（如Java NIO 通道）。
+     * 此方法的返回值为出站处理的异步处理任务。
      */
     ChannelFuture write(Object msg);
 
@@ -216,6 +235,9 @@ public interface ChannelOutboundInvoker {
 
     /**
      * Request to flush all pending messages via this ChannelOutboundInvoker.
+     *
+     * 此方法的作用为：将缓冲区中的数据立即写出到对端。调用前面的write(...) 出站处理时，并不能将数据直接写出到对端，write 操作的作用在大部分情况
+     * 下仅仅是对写入到操作系统的缓冲区，操作系统会根据缓冲区的情况，决定什么时候把数据写到对端。而执行flush 方法立即将缓冲区的数据写到对端。
      */
     ChannelOutboundInvoker flush();
 

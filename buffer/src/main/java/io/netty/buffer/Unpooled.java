@@ -69,6 +69,8 @@ import java.util.Arrays;
  * between the original data and the copied buffer.  Various copy methods are
  * provided and their name is all {@code copiedBuffer()}.  It is also convenient
  * to use this operation to merge multiple buffers into one buffer.
+ *
+ * 为了快速创建ByteBuf，Netty 提供了一个非常方便的获取缓冲区的类——Unpooled 帮助类，用它来创建和使用非池化的缓冲区。
  */
 public final class Unpooled {
 

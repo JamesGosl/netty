@@ -49,6 +49,10 @@ import java.util.List;
  * Be aware that you need to call {@link ReferenceCounted#retain()} on messages that are just passed through if they
  * are of type {@link ReferenceCounted}. This is needed as the {@link MessageToMessageEncoder} will call
  * {@link ReferenceCounted#release()} on encoded messages.
+ *
+ * Netty 的编码器将某一种POJO 对象编码成另外一种POJO 对象，需要继承另外一个Netty 的重要编码器———MessageToMessageEncoder，并实现它的encode
+ * 抽象方法。在子类的encode 方法实现中，完成原POJO 类型到目标POJO 类型的转换逻辑。在encode 实现方法中，编码完成后，将编码后的对象目标加入到encode
+ * 方法中的实参List 输出容器即可。
  */
 public abstract class MessageToMessageEncoder<I> extends ChannelOutboundHandlerAdapter {
 

@@ -58,6 +58,10 @@ import java.util.List;
  * | ABC\nDEF |
  * +----------+
  * </pre>
+ *
+ * DelimiterBasedFrameDecoder 解码器不仅可以使用换行符，还可以将其他的特殊字符作为数据包的分隔符，例如制表符“\t”。
+ *
+ * DelimiterBasedFrameDecoder 解码器的使用方式与LineBasedFrameDecoder 是一样的，只是在构造参数上有一点点不同。
  */
 public class DelimiterBasedFrameDecoder extends ByteToMessageDecoder {
 

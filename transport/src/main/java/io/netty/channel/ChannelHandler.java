@@ -174,17 +174,27 @@ import java.lang.annotation.Target;
  * {@link ChannelPipeline} to find out more about inbound and outbound operations,
  * what fundamental differences they have, how they flow in a  pipeline,  and how to handle
  * the operation in your application.
+ *
+ * ChannelHandler 定义了声明周期相关的一些方法
+ *
+ * Handler 处理器
  */
 public interface ChannelHandler {
 
     /**
      * Gets called after the {@link ChannelHandler} was added to the actual context and it's ready to handle events.
+     *
+     * 当业务处理器被加入到流水线后，此方法将被回调。
+     *
+     * 也就是在完成pipeline.addLast(handler) 之后，会回调handlerAdded 方法
      */
     void handlerAdded(ChannelHandlerContext ctx) throws Exception;
 
     /**
      * Gets called after the {@link ChannelHandler} was removed from the actual context and it doesn't handle events
      * anymore.
+     *
+     * 当业务处理器从流水线删除后，此方法将被回调。
      */
     void handlerRemoved(ChannelHandlerContext ctx) throws Exception;
 
@@ -193,6 +203,8 @@ public interface ChannelHandler {
      *
      * @deprecated if you want to handle this event you should implement {@link ChannelInboundHandler} and
      * implement the method there.
+     *
+     * 当业务处理器中存在异常后，此方法将被回调。
      */
     @Deprecated
     void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception;

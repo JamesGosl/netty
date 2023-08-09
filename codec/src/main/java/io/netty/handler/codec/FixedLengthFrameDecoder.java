@@ -37,6 +37,8 @@ import java.util.List;
  * | ABC | DEF | GHI |
  * +-----+-----+-----+
  * </pre>
+ *
+ * 固定长度数据包解码器，每个接受到的数据包的长度，都是固定的。
  */
 public class FixedLengthFrameDecoder extends ByteToMessageDecoder {
 

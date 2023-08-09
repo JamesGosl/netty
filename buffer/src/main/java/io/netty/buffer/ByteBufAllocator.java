@@ -18,6 +18,17 @@ package io.netty.buffer;
 /**
  * Implementations are responsible to allocate buffers. Implementations of this interface are expected to be
  * thread-safe.
+ *
+ * Netty 通过ByteBufAllocator 分配器来创建缓冲区和分配内存空间。Netty 提供了两种分配器实现：PoolByteBufAllocator 和UnpooledByteBufAllocator。
+ *
+ * PoolByteBufAllocator（池化的ByteBuf 分配器）将ByteBuf 实例放入池中，提高了性能，将内存碎片减少到最小；池化分配器采用了类jemalloc 的高效
+ * 内存分配的策略，该策略被好几种现代操作系统所采用。
+ *
+ * UpooledByteBufAllocator 是普通的未池化ByteBuf 分配器，它没有把ByteBuf 放入池中，每次被调用时，返回一个新的ByteBuf 实例；使用完之后，通过
+ * Java 的垃圾回收机制回收或者直接释放（对于直接内存而言）。
+ *
+ * 在通讯程序的数据传输过程中，Buffer 缓冲区实例会被频繁创建、使用、释放，而释放创建对象、内存分配、释放内存，这样导致系统的开销大、性能低。池化ByteBuf
+ * 是一种非常有效的方式，所以，Netty 默认使用的分配器为PoolByteBufAllocator。
  */
 public interface ByteBufAllocator {
 

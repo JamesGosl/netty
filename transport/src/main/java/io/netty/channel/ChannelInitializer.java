@@ -49,6 +49,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Be aware that this class is marked as {@link Sharable} and so the implementation must be safe to be re-used.
  *
  * @param <C>   A sub-type of {@link Channel}
+ *
+ * Chanel 通道和Handler 业务处理器的关系是：一条Netty 的通道拥有一条Handler 业务处理器流水线，负责装配自己的Handler 业务处理器。装配Handler
+ * 的工作，发生在开始工作之前。这就得借助通道的初始化处理器——ChannelInitializer
  */
 @Sharable
 public abstract class ChannelInitializer<C extends Channel> extends ChannelInboundHandlerAdapter {
@@ -67,6 +70,13 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
      * @throws Exception    is thrown if an error occurs. In that case it will be handled by
      *                      {@link #exceptionCaught(ChannelHandlerContext, Throwable)} which will by default close
      *                      the {@link Channel}.
+     *
+     * initChannel 方法是ChannelInitializer 定义的一个抽象方法，这个抽象方法需要开发人员自己实现。
+     *
+     * 在通道初始化时，会调用提前注册的初始化处理器的initChannel 方法。比如，在父通道接收到新连接并且要初始化其子通道时，会调用初始化器的initChannel
+     * 方法，并且会将新接受的通道作为参数，传递给此方法。
+     *
+     * 一般来说，initChannel 方法的大致业务代码是：拿到新连接通道作为实际参数，往它的流水线中装配Handler 业务处理器。
      */
     protected abstract void initChannel(C ch) throws Exception;
 

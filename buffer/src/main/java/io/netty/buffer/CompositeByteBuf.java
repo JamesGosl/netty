@@ -45,6 +45,14 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
  * A virtual buffer which shows multiple buffers as a single merged buffer.  It is recommended to use
  * {@link ByteBufAllocator#compositeBuffer()} or {@link Unpooled#wrappedBuffer(ByteBuf...)} instead of calling the
  * constructor explicitly.
+ *
+ * CompositeByteBuf 可以把需要合并的多个ByteBuf 组合起来，对外提供统一的readIndex 和writerIndex。CompositeByteBuf 只是逻辑上是一个整体，
+ * 在CompositeByteBuf 内部，合并的多个ByteBuf 都是单独存在的。CompositeByteBuf 里面有个components 数组，聚合的ByteBuf 都放在components
+ * 数组里面，最小容量为16。
+ *
+ * 在很多通信编程场景下，需要多个ByteBuf 组成一个完整的消息：例如HTTP 协议传输时消息总由Header（消息头）和Body（消息体）组成的。如果传输的内容
+ * 很长，就会分成多个消息包进行发送，消息中的Header 就需要重用，而不是每次发送都创建新的Header 缓冲区。这个时候可以使用CompositeByteBuf 缓冲区
+ * 进行ByteBuf 组合，避免内存拷贝。
  */
 public class CompositeByteBuf extends AbstractReferenceCountedByteBuf implements Iterable<ByteBuf> {
 

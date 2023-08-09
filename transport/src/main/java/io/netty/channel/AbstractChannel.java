@@ -39,6 +39,8 @@ import java.util.concurrent.RejectedExecutionException;
 
 /**
  * A skeletal {@link Channel} implementation.
+ *
+ * Channel 通道
  */
 public abstract class AbstractChannel extends DefaultAttributeMap implements Channel {
 
@@ -69,9 +71,12 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      *        the parent of this channel. {@code null} if there's no parent.
      */
     protected AbstractChannel(Channel parent) {
+        // 父子通道的概念
         this.parent = parent;
         id = newId();
+        // 底层的NIO 通道，完成实际的I/O 操作
         unsafe = newUnsafe();
+        // 通道流水线
         pipeline = newChannelPipeline();
     }
 
@@ -505,6 +510,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     return;
                 }
                 boolean firstRegistration = neverRegistered;
+                // Socket.register
                 doRegister();
                 neverRegistered = false;
                 registered = true;
@@ -559,6 +565,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             boolean wasActive = isActive();
             try {
+                // Socket.bind
                 doBind(localAddress);
             } catch (Throwable t) {
                 safeSetFailure(promise, t);

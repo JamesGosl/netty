@@ -133,13 +133,17 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
         @Override
         public final void read() {
+            // Channel 的config 信息
             final ChannelConfig config = config();
             if (shouldBreakReadReady(config)) {
                 clearReadPending();
                 return;
             }
+            // Channel 的Pipeline 流水线
             final ChannelPipeline pipeline = pipeline();
+            // 获取通道的缓冲区分配器
             final ByteBufAllocator allocator = config.getAllocator();
+            // 缓冲区分配时的大小推测和计算组件
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
             allocHandle.reset(config);
 
@@ -147,7 +151,10 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             boolean close = false;
             try {
                 do {
+                    // 使用缓冲区分配器、大小计算组件
+                    // 由分配器按照计算好的大小分配的一个缓冲区
                     byteBuf = allocHandle.allocate(allocator);
+                    // 读取数据到缓冲区
                     allocHandle.lastBytesRead(doReadBytes(byteBuf));
                     if (allocHandle.lastBytesRead() <= 0) {
                         // nothing was read. release the buffer.
@@ -163,6 +170,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
                     allocHandle.incMessagesRead(1);
                     readPending = false;
+                    // 发送数据到流水线，进行入站处理
                     pipeline.fireChannelRead(byteBuf);
                     byteBuf = null;
                 } while (allocHandle.continueReading());
@@ -216,10 +224,12 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         if (msg instanceof ByteBuf) {
             ByteBuf buf = (ByteBuf) msg;
             if (!buf.isReadable()) {
+                // 内部会释放缓冲区
                 in.remove();
                 return 0;
             }
 
+            // 发送缓冲区的字节数据到Java NIO 通道
             final int localFlushedAmount = doWriteBytes(buf);
             if (localFlushedAmount > 0) {
                 in.progress(localFlushedAmount);
@@ -253,6 +263,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     @Override
     protected void doWrite(ChannelOutboundBuffer in) throws Exception {
         int writeSpinCount = config().getWriteSpinCount();
+        // 发送缓冲区的数据，直到缓冲区发送完毕
         do {
             Object msg = in.current();
             if (msg == null) {

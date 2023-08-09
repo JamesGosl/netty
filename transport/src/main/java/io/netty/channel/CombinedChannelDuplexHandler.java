@@ -28,6 +28,17 @@ import java.net.SocketAddress;
 
 /**
  *  Combines a {@link ChannelInboundHandler} and a {@link ChannelOutboundHandler} into one {@link ChannelHandler}.
+ *
+ *  解码器和编码器相结合是通过继承完成的。继承的方式有其不足，在于：将编码器和解码器的逻辑强制性地放在同一个类中，在只需要编码或者解码单边操作的流水线上，
+ *  逻辑上不大合适。
+ *
+ *  编码器和解码器如果要结合起来，除了继承的方式之外，还可以通过组合的方式实现。与继承相比，组合会带来更大的灵活性：编码器和解码器可以捆绑使用，也可以
+ *  单独使用。
+ *
+ *  仅仅实现或继承CombinedChannelDuplexHandler 即可，不需要像ByteToMessageCoder 那样，把编码逻辑和解码逻辑都挤在同一个类中了，还是复用原来
+ *  的分开的编码器和解码器实现代码。
+ *
+ *  总之，使用CombinedChannelDuplexHandler 可以保证有了相反逻辑关系的encoder 编码器和decoder 解码器，既可以组合使用，又可以分开使用，十分方便。
  */
 public class CombinedChannelDuplexHandler<I extends ChannelInboundHandler, O extends ChannelOutboundHandler>
         extends ChannelDuplexHandler {

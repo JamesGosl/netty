@@ -264,12 +264,35 @@ import java.util.List;
  * @param <S>
  *        the state type which is usually an {@link Enum}; use {@link Void} if state management is
  *        unused
+ *
+ * 普通解码器会面临一个问题：需要对ByteBuf 的长度进行检查，如果有足够的字节，才进行整数的读取。可以使用Netty 的ReplayingDecoder 类可以省去长度的判断。
+ *
+ * ReplayingDecoder 类是ByteToMessageDecoder 的子类。其作用是：
+ * （1）在读取ByteBuf 缓冲区的数据之前，需要检查缓冲区是否有足够的字节。
+ * （2）若ByteBuf 有足够的字节，则会正常读取；反之，如果没有足够的字节，则会停止解码。
+ *
+ * ReplayingDecoder 进行长度判断的原理其实很简单：它的内部定义了一个新的二进制缓冲区类，对ByteBuf 缓冲区进行了装饰，这个类名为ReplayingDecoderByteBuf。
+ * 该装饰器的特点是：在缓冲区真正读取数据之前，首先进行长度判断：如果长度合格，则读取数据；否则，抛出ReplayError。ReplayingDecoder 捕获到ReplayError
+ * 后，会留着数据，等待下一次IO 事件到来时再读取。
+ *
+ * 简单来讲，ReplayingDecoder 对输入的ByteBuf 进行了偷梁换柱，在将外部传入的ByteBuf 缓冲区传给子类之前，换成了自己装饰过的ReplayingDecoderByteBuf 缓冲区。
+ *
+ *
+ * 通过ReplayingDecoder 解码器，可以正确的解码分包后的ByteBuf 数据包。但是，在实际的开发中，不太建议继承这个类，原因是：
+ * （1）不是所有的ByteBuf 操作都被ReplayingDecoderBuffer 装饰器所支持，有可能有些ByteBuf 方法在ReplayingDecoder 的decode 实现方法中被
+ * 使用时就会抛出ReplayError 异常。
+ * （2）在数据解码逻辑复杂的应用场景，ReplayingDecoder 在解码速度上相对较差。原因是在ByteBuf 中长度不够时，ReplayingDecoder 会捕获一个ReplayError
+ * 异常，这时会把ByteBuf 中的读指针还原到之前的读指针检查点（checkpoint），然后结束这次解析过程，等待下一次IO 读事件。在网络条件比较糟糕时，一个数据包
+ * 的解析逻辑会被反复执行多次，此时解析过程是一个消耗CPU 的操作，所以解码速度上相对较差。所以，ReplayingDecoder 更多的是应用于数据解析逻辑简单的场景。
+ *
  */
 public abstract class ReplayingDecoder<S> extends ByteToMessageDecoder {
 
     static final Signal REPLAY = Signal.valueOf(ReplayingDecoder.class, "REPLAY");
 
+    // 缓冲区装饰器
     private final ReplayingDecoderByteBuf replayable = new ReplayingDecoderByteBuf();
+    // 重要的成员属性，表示解码过程中的所处阶段，类型为泛型，默认为Object
     private S state;
     private int checkpoint = -1;
 
@@ -297,6 +320,8 @@ public abstract class ReplayingDecoder<S> extends ByteToMessageDecoder {
     /**
      * Stores the internal cumulative buffer's reader position and updates
      * the current decoder state.
+     *
+     * 修改状态
      */
     protected void checkpoint(S state) {
         checkpoint();
