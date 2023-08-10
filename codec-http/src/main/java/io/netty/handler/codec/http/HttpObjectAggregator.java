@@ -82,6 +82,10 @@ import static io.netty.handler.codec.http.HttpUtil.getContentLength;
  * @see FullHttpResponse
  * @see HttpResponseDecoder
  * @see HttpServerCodec
+ *
+ * 是HttpObject 实例聚合器，Aggregator 是“聚合，聚集”的意思，这也是一个入站处理器。通过HttpObject 实例聚合器，可以把HttpMessage 首部实例和
+ * 一个或多个HttpContent 内容实例，最终聚合成一个FullHttpRequest 实例。上下文中涉及到的与HTTP 相关的HttpMessage、HttpRequest、HttpContent、
+ * FullHttpReqeust 等类型，都是HttpObject 的子类。
  */
 public class HttpObjectAggregator
         extends MessageAggregator<HttpObject, HttpMessage, HttpContent, FullHttpMessage> {

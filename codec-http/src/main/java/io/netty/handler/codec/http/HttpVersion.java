@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
  * The version of HTTP or its derived protocols, such as
  * <a href="https://en.wikipedia.org/wiki/Real_Time_Streaming_Protocol">RTSP</a> and
  * <a href="https://en.wikipedia.org/wiki/Internet_Content_Adaptation_Protocol">ICAP</a>.
+ *
+ * 是对HTTP 版本Version 的封装，该类定义了HTTP/1.0 和HTTP/1.1 两个协议版本。
  */
 public class HttpVersion implements Comparable<HttpVersion> {
 

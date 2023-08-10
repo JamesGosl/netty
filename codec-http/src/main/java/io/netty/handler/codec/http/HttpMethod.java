@@ -24,6 +24,8 @@ import static io.netty.util.internal.ObjectUtil.checkNonEmptyAfterTrim;
  * The request method of HTTP or its derived protocols, such as
  * <a href="https://en.wikipedia.org/wiki/Real_Time_Streaming_Protocol">RTSP</a> and
  * <a href="https://en.wikipedia.org/wiki/Internet_Content_Adaptation_Protocol">ICAP</a>.
+ *
+ * 主要是对HTTP 请求方法Method 的封装
  */
 public class HttpMethod implements Comparable<HttpMethod> {
     /**

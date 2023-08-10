@@ -26,6 +26,9 @@ import io.netty.channel.ChannelPipeline;
  * is 'chunked.  If you prefer not to receive {@link HttpContent} in your handler,
  * place {@link HttpObjectAggregator} after {@link HttpObjectDecoder} in the
  * {@link ChannelPipeline}.
+ *
+ * 是对HTTP 请求体Body 进行封装，本质上就是一个ByteBuf 缓冲区实例。如果ByteBuf 的长度是固定的，则请求的Body 过大，可能包含多个HttpContent。
+ * 解码的时候，最后一个解码返回对象为lastHttpContent(空的HttpContent)，表示对Body 的解码已经结束。
  */
 public interface HttpContent extends HttpObject, ByteBufHolder {
     @Override

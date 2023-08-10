@@ -32,6 +32,8 @@ import static io.netty.handler.codec.http.HttpObjectDecoder.DEFAULT_MAX_INITIAL_
  * which enables easier server side HTTP implementation.
  *
  * @see HttpClientCodec
+ *
+ * HTTP 的编解码器，是HttpRequestDecoder 解码器和httpResponseEncoder 编码器的结合体。
  */
 public final class HttpServerCodec extends CombinedChannelDuplexHandler<HttpRequestDecoder, HttpResponseEncoder>
         implements HttpServerUpgradeHandler.SourceCodec {

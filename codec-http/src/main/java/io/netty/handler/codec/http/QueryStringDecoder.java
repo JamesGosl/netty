@@ -59,6 +59,8 @@ import static io.netty.util.internal.StringUtil.decodeHexByte;
  * integer parameter.
  *
  * @see QueryStringEncoder
+ *
+ * 把HTTP 的请求URI 分隔成Path 路径和key-value 参数键值对，同义词请求，该解码器仅能使用一次。
  */
 public class QueryStringDecoder {
 

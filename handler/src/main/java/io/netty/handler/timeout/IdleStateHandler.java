@@ -95,6 +95,8 @@ import java.util.concurrent.TimeUnit;
  *
  * @see ReadTimeoutHandler
  * @see WriteTimeoutHandler
+ *
+ * 空闲状态检测
  */
 public class IdleStateHandler extends ChannelDuplexHandler {
     private static final long MIN_TIMEOUT_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
@@ -159,6 +161,11 @@ public class IdleStateHandler extends ChannelDuplexHandler {
 
     /**
      * @see #IdleStateHandler(boolean, long, long, long, TimeUnit)
+     *
+     * readerIdleTimeSeconds 表示入站（Inbound）空闲时长，指的是一段时间内如果没有数据入站，就判定连接假死
+     * writerIdleTimeSeconds 表示出站（Outbound）空闲时长，指的是一段时间内如果乜有数据出站，就判定连接假死
+     * allIdleTimeSeconds 表示出/入站检测时长，表示在一段时间如果没有出站或者入站，就判定连接假死
+     * unit 表示时间单位
      */
     public IdleStateHandler(
             long readerIdleTime, long writerIdleTime, long allIdleTime,
@@ -277,6 +284,7 @@ public class IdleStateHandler extends ChannelDuplexHandler {
         super.channelInactive(ctx);
     }
 
+    // 通常在这里要对心跳数据包进行回复操作
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (readerIdleTimeNanos > 0 || allIdleTimeNanos > 0) {
@@ -368,6 +376,10 @@ public class IdleStateHandler extends ChannelDuplexHandler {
     /**
      * Is called when an {@link IdleStateEvent} should be fired. This implementation calls
      * {@link ChannelHandlerContext#fireUserEventTriggered(Object)}.
+     *
+     * 如果判定为假死 那么会触发这个方法的回调
+     *
+     * 有两种实现方式：一种是继承，另一种是实现userEventTriggered 检测IdleStateEvent 类型的消息
      */
     protected void channelIdle(ChannelHandlerContext ctx, IdleStateEvent evt) throws Exception {
         ctx.fireUserEventTriggered(evt);

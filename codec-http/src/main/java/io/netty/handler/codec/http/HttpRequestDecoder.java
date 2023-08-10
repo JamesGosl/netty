@@ -74,6 +74,9 @@ import io.netty.util.AsciiString;
  *     the readable bytes are greater or equal to the chunk size.</td>
  * </tr>
  * </table>
+ *
+ * HTTP 请求解码器，这是一个入站处理器，间接的继承了ByteToMessageDecoder，将ByteBuf 缓冲区解码成代表请求的HttpRequest 首部实例和HttpContext
+ * 内容实例。并且，HttpRequestDecoder 在解码时会处理好分块（Chunked）类型和固定长度（Content-Length）类型的HTTP 请求报文。
  */
 public class HttpRequestDecoder extends HttpObjectDecoder {
 

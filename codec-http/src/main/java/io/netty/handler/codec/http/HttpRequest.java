@@ -34,6 +34,8 @@ package io.netty.handler.codec.http;
  * @see io.netty.handler.codec.http.cookie.ClientCookieDecoder
  * @see io.netty.handler.codec.http.cookie.ServerCookieEncoder
  * @see io.netty.handler.codec.http.cookie.ClientCookieEncoder
+ *
+ * 请求头部，主要包含对HTTP 请求行（Request Line）和请求头Header 的组合。
  */
 public interface HttpRequest extends HttpMessage {
 
@@ -65,6 +67,8 @@ public interface HttpRequest extends HttpMessage {
      * Returns the requested URI (or alternatively, path)
      *
      * @return The URI being requested
+     *
+     * 主要是对请求URI 的封装，该成员包含了HTTP 请求的Path 路径和跟随在其后的请求参数。
      */
     String uri();
 
